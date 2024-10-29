@@ -47,6 +47,10 @@ pipx ensurepath
 sudo pipx ensurepath --global
 pipx install poetry
 ```
+Python install: `Python3.12+ < Brew`
+```
+brew install python3
+```
 ### WINDOWS
 Dependency chain: `Poetry < Pipx < Scoop`
 
@@ -60,6 +64,10 @@ scoop install pipx
 pipx ensurepath
 pipx install poetry
 ```
+Python install: [https://www.python.org/downloads/windows/](https://www.python.org/downloads/windows/)
+(Download python3.12 or higher)
+
+
 
 ### WINDOWS alt
 Dependency chain: `Pipx < pip < python3 / python / py`
@@ -75,5 +83,6 @@ and then:
 pipx ensurepath
 pipx install poetry
 ```
+
 
 README written with [Online Github Markdown Editor](https://jbt.github.io/markdown-editor/) by jbt
