@@ -90,7 +90,7 @@ def pause():
     global speed
     speed = 0
 
-
+#TEMPORARY FIX FOR UI SCALING ISSUES BASED ON OS, PLEASE HAVE A LESS CAVEMAN FIX LATER
 if platform.system() == "Darwin":  # macOS
     button_scale = 0.005
     button_spacing = 0.006
@@ -98,13 +98,20 @@ if platform.system() == "Darwin":  # macOS
     y_position = -.02
     x_position = -.02
     text_scale = (text_size, .1)
-else:
+elif platform.system() == "Windows": #Windows
     button_scale = 0.1
     button_spacing = 0.06
     text_size = 0.9
     y_position = -0.3
     x_position = -0.2
     text_scale = (text_size, 1)
+else: #Linux, pls change vals as you see fit
+    button_scale = 0.005
+    button_spacing = 0.006
+    text_size = 0.09
+    y_position = -.02
+    x_position = -.02
+    text_scale = (text_size, .1)
 # Play button
 play_button = Button(
     text='Play',
