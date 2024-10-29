@@ -92,7 +92,7 @@ def pause():
 
 
 if platform.system() == "Darwin":  # macOS
-    button_scale = 0.05
+    button_scale = 0.005
     button_spacing = 0.006
     text_size = 0.09
     y_position = -.02
@@ -108,8 +108,8 @@ else:
 # Play button
 play_button = Button(
     text='Play',
-    position=(-0.1, y_position),
-    text_size=text_size,  # Use normalized text size
+    position=(x_position, y_position),
+    text_size=text_size,  
     scale=button_scale,
     color=color.black,
     parent=camera.ui,
