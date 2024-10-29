@@ -1,6 +1,7 @@
 import os
 import pandas as pd
 from ursina import *
+import platform
 
 # Load the dataset
 data = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'dataset.csv'))
@@ -9,6 +10,8 @@ data = pd.read_csv(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'da
 x = data['Rx(km)[J2000-EARTH]']
 y = data['Ry(km)[J2000-EARTH]']
 z = data['Rz(km)[J2000-EARTH]']
+mass = data['MASS (kg)']
+missionTime = data['MISSION ELAPSED TIME (mins)']
 
 # Initialize the Ursina application
 app = Ursina()
@@ -41,12 +44,15 @@ Entity(model='cube', color=color.white, scale=(.1, .1, 50), position=(0, 0, 25))
 mark = Entity(model='sphere', color=color.red, scale=2)
 mark.position=trajectory_points[0]
 
+currentIndex=0
 def update_sphere_position(perc):
-	index = int(perc * (len(trajectory_points) - 1))
+    global currentIndex
 
-	out = slerp(trajectory_points[index], trajectory_points[index+1], perc)
+    currentIndex = int(perc * (len(trajectory_points) - 1))
 
-	mark.position = out
+    out = slerp(trajectory_points[currentIndex], trajectory_points[currentIndex+1], perc)
+
+    mark.position = out
 
 
 # video stats
@@ -61,11 +67,12 @@ def step_frame(dt):
 
 # video buttons
 def play():
-	global speed,camera
-	if speed<0:
-		speed=1
-	else:
-		speed+=.5
+    global speed
+    if speed < 0:
+        speed = 1
+    else:
+        speed += .5
+
 
 def rev():
 	global speed
@@ -76,6 +83,22 @@ def rev():
 def pause():
 	global speed
 	speed=0
+
+
+if platform.system() == "Darwin":  # macOS
+    button_scale = 0.005
+    button_spacing = 0.006
+    text_size = 0.09
+    y_position = -.02
+    x_position = -.02
+    text_scale = (text_size, .1)
+else:
+    button_scale = 0.1
+    button_spacing = 0.06
+    text_size = 0.9
+    y_position = -0.3
+    x_position = -0.2
+    text_scale = (text_size, 1)
 
 play_button = Button(text='Play', position=(-.02,-.02), text_size=.09, scale=.005, color=color.black, parent=camera.ui, text_color=color.green)
 play_button.on_click = play
@@ -89,9 +112,33 @@ reverse_button.on_click = rev
 Text(text="Hold right mouse to rotate\nWASD to move the camera while rotating\nCommand+Q to quit",position=(-.02,.02),scale=(.09,.1),color=color.green,alpha=.5)
 
 
+info_text = Text(
+    text="Thrusting: ???\nTIME",
+    position=(-.02, .022),
+    scale=text_scale,
+    color=color.white,
+    alpha=0.9
+)
+
+thrusting=False
+def update_info(textE,thrusting):
+    if currentIndex!=0 and mass[currentIndex]!=mass[currentIndex-1]:
+        thrusting=True
+    if thrusting and mass[currentIndex]==mass[currentIndex-1]:
+        thrusting=False
+
+    if thrusting:
+        textE.text="Thrusting: YES ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.color=color.green
+    else:
+        textE.text="Thrusting: NO ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.color=color.black
+
 # Run the application
 while True:
-	# v+=1/60 * time.dt # one minute to completion.
-	step_frame(time.dt)
-	update_sphere_position(current_frac)
-	app.step()
+    # v+=1/60 * time.dt # one minute to completion.
+    step_frame(time.dt)
+    update_sphere_position(current_frac)
+    update_info(info_text,thrusting)
+
+    app.step()
