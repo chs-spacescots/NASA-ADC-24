@@ -97,14 +97,14 @@ if platform.system() == "Darwin":  # macOS
     text_size = 0.09
     y_position = -.02
     x_position = -.02
-    text_scale = (text_size, text_size)
+    text_scale = (text_size, .1)
 else:
-    button_scale = 0.25
-    button_spacing = 0.05
+    button_scale = 0.1
+    button_spacing = 0.06
     text_size = 0.9
-    y_position = -.3
-    x_position = -0.1
-    text_scale = (text_size, text_size)
+    y_position = -0.3
+    x_position = -0.2
+    text_scale = (text_size, 1)
 # Play button
 play_button = Button(
     text='Play',
@@ -144,7 +144,7 @@ reverse_button.on_click = rev
 # Instructions for dumbos
 instructions_text = Text(
     text="Hold right mouse to rotate\nWASD to move the camera while rotating\nCommand+Q to quit",
-    position=(x_position, y_position + button_scale),
+    position=(x_position, -y_position),
     scale=text_scale,
     color=color.white,
     alpha=0.9
