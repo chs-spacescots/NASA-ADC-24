@@ -106,17 +106,17 @@ elif platform.system() == "Windows": #Windows
     x_position = -0.2
     text_scale = (text_size, 1)
 else: #Linux, pls change vals as you see fit
-    button_scale = 0.005
-    button_spacing = 0.006
-    text_size = 0.09
-    y_position = -.02
+    button_scale = 0.1
+    button_spacing = 0.06
+    text_size = 0.9
+    y_position = -.075
     x_position = -.02
-    text_scale = (text_size, .1)
+    text_scale = (text_size, 1)
 # Play button
 play_button = Button(
     text='Play',
     position=(x_position, y_position),
-    text_size=text_size,  
+    text_size=text_size,
     scale=button_scale,
     color=color.black,
     parent=camera.ui,
