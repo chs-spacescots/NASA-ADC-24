@@ -2,6 +2,7 @@ import os
 import platform
 import pandas as pd
 from ursina import *
+import platform
 
 # Load the dataset
 data = pd.read_csv(os.path.join(os.path.dirname(
@@ -11,6 +12,8 @@ data = pd.read_csv(os.path.join(os.path.dirname(
 x = data['Rx(km)[J2000-EARTH]']
 y = data['Ry(km)[J2000-EARTH]']
 z = data['Rz(km)[J2000-EARTH]']
+mass = data['MASS (kg)']
+missionTime = data['MISSION ELAPSED TIME (mins)']
 
 # Initialize the Ursina application
 app = Ursina()
@@ -48,10 +51,13 @@ mark = Entity(model='sphere', color=color.red, scale=2)
 mark.position = trajectory_points[0]
 
 
+currentIndex=0
 def update_sphere_position(perc):
-    index = int(perc * (len(trajectory_points) - 1))
+    global currentIndex
 
-    out = slerp(trajectory_points[index], trajectory_points[index+1], perc)
+    currentIndex = int(perc * (len(trajectory_points) - 1))
+
+    out = slerp(trajectory_points[currentIndex], trajectory_points[currentIndex+1], perc)
 
     mark.position = out
 
@@ -157,9 +163,47 @@ instructions_text = Text(
     alpha=0.9
 )
 
+info_text = Text(
+    text="Thrusting: ???\nTIME",
+    position=(-.02, .022),
+    scale=text_scale,
+    color=color.white,
+    alpha=0.9
+)
+
+thrusting=False
+def update_info(textE,thrusting):
+    if currentIndex!=0 and mass[currentIndex]!=mass[currentIndex-1]:
+        thrusting=True
+    if thrusting and mass[currentIndex]==mass[currentIndex-1]:
+        thrusting=False
+
+    if thrusting:
+        textE.text="Thrusting: YES ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.color=color.green
+    else:
+        textE.text="Thrusting: NO ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.color=color.black
+
+thrusting=False
+def update_info(textE,thrusting):
+    if currentIndex!=0 and mass[currentIndex]!=mass[currentIndex-1]:
+        thrusting=True
+    if thrusting and mass[currentIndex]==mass[currentIndex-1]:
+        thrusting=False
+
+    if thrusting:
+        textE.text="Thrusting: YES ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.color=color.green
+    else:
+        textE.text="Thrusting: NO ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.color=color.black
+
 # Run the application
 while True:
     # v+=1/60 * time.dt # one minute to completion.
     step_frame(time.dt)
     update_sphere_position(current_frac)
+    update_info(info_text,thrusting)
+
     app.step()
