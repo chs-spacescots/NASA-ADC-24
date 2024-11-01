@@ -1,6 +1,7 @@
 import os
 import platform
 from ursina import *
+import numpy as np
 
 try:
     import libdata as data
@@ -22,6 +23,8 @@ EditorCamera()
 
 # Create a mesh from the trajectory
 data.wait_until_ready("trajectory")
+
+# Create a mesh for the trajectory
 trajectory_mesh = Entity(
     model=Mesh(vertices=data.trajectory_points, mode='line', thickness=1),
     color=color.blue
@@ -177,11 +180,62 @@ def update_info(textE,thrusting):
         textE.text=f"Thrusting: NO {data.mass[currentIndex]}\n{int(data.time_min[currentIndex])}:{int(data.time_sec[currentIndex]%60)}"
         textE.color=color.black
 
+#capsule display window (displays capsule velocity vector, mass, orientation, position) DATA ONLY
+data.wait_until_ready("velocity")
+capsule_text = Text(
+    text="Position: ????",
+    position=(x_position, -y_position + -y_position * .2),
+    scale=text_scale,
+    color=color.white,
+    alpha=0.9
+)
+def get_pos():
+    global currentIndex
+    return data.trajectory_points[currentIndex]
+
+def get_capsule_vel():
+    global currentIndex
+    return data.velocities[currentIndex]
+    
+
+def get_orientation(velocity_vector):
+    vx, vy, vz = velocity_vector
+    pitch = np.arctan2(vy, np.sqrt(vx**2 + vz**2))
+    yaw = np.arctan2(vx, vz)
+    pitch_deg = np.degrees(pitch)
+    yaw_deg = np.degrees(yaw)
+    
+    return pitch_deg, yaw_deg 
+
+def format_orientation(pitch, yaw):
+    return f"Pitch: {pitch:6.2f}°, Yaw: {yaw:6.2f}°"
+
+def capsule_info(textC):
+    try:
+        # Get current position and velocity
+        current_pos = get_pos()
+        current_vel = get_capsule_vel()
+        
+        # Calculate orientation
+        pitch, yaw = get_orientation(current_vel)
+        
+        pos_str = f"Position (km):    {current_pos}" 
+        vel_str = f"Velocity (km/s):  {current_vel}"
+        ori_str = f"Orientation:      {format_orientation(pitch, yaw)}"
+        
+        # Update the text
+        textC.text = f"{pos_str}\n{vel_str}\n{ori_str}"
+        
+    except Exception as e:
+        print(f"Error updating capsule info: {e}")
+        textC.text = "Error updating telemetry"
+
 # Run the application
 while True:
     # v+=1/60 * time.dt # one minute to completion.
     step_frame(time.dt)
     update_sphere_position(current_frac)
     update_info(info_text,thrusting)
-
+    capsule_info(capsule_text)
+    
     app.step()
