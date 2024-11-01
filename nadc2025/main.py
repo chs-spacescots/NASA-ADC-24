@@ -2,21 +2,13 @@ import os
 import platform
 from ursina import *
 import numpy as np
+try:
+    import libdata as data
+except:
+    from nadc2025 import libdata as data
 
-# Load the dataset
-data = pd.read_csv(os.path.join(os.path.dirname(
-    os.path.realpath(__file__)), 'dataset.csv'))
-
-# Extract the position coordinates
-x = data['Rx(km)[J2000-EARTH]']
-y = data['Ry(km)[J2000-EARTH]']
-z = data['Rz(km)[J2000-EARTH]']
-mass = data['MASS (kg)']
-missionTime = data['MISSION ELAPSED TIME (mins)']
-Vx = data['Vx(km/s)[J2000-EARTH]']
-Vy = data['Vy(km/s)[J2000-EARTH]']
-Vz = data['Vz(km/s)[J2000-EARTH]']
-velocities = []
+#load & read data
+data.init()
 
 # Initialize the Ursina application
 app = Ursina()
@@ -202,7 +194,7 @@ def get_pos():
 
 def get_capsule_vel():
     global currentIndex
-    return data.velocities(currentIndex)
+    return data.velocities[currentIndex]
 
 def get_orientation(velocity_vector):
     vx, vy, vz = velocity_vector
@@ -225,8 +217,8 @@ def capsule_info(textC):
         # Calculate orientation
         pitch, yaw = get_orientation(current_vel)
         
-        pos_str = f"Position (km):    {current_pos}" 
-        vel_str = f"Velocity (km/s):  {current_vel}"
+        pos_str = "Position (km): " + str(current_pos) 
+        vel_str = "Velocity (km/s): " + str(current_vel)
         ori_str = f"Orientation:      {format_orientation(pitch, yaw)}"
         
         # Update the text
