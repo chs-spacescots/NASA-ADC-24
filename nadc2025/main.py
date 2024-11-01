@@ -2,7 +2,7 @@ import os
 import platform
 import pandas as pd
 from ursina import *
-import platform
+import numpy as np
 
 # Load the dataset
 data = pd.read_csv(os.path.join(os.path.dirname(
@@ -194,7 +194,7 @@ def update_info(textE,thrusting):
 #capsule display window (displays capsule velocity vector, mass, orientation, position) DATA ONLY
 capsule_text = Text(
     text="Position: ????",
-    position=(x_position, -y_position + -y_position * .2),
+    position=(x_position, -y_position + -y_position * .3),
     scale=text_scale,
     color=color.white,
     alpha=0.9
@@ -209,10 +209,38 @@ def get_capsule_vel():
     global currentIndex, velocities
     vx, vy, vz = velocities[currentIndex]
     return float(vx), float(vy), float(vz)
+
+def get_orientation(velocity_vector):
+    vx, vy, vz = velocity_vector
+    pitch = np.arctan2(vy, np.sqrt(vx**2 + vz**2))
+    yaw = np.arctan2(vx, vz)
+    pitch_deg = np.degrees(pitch)
+    yaw_deg = np.degrees(yaw)
     
+    return pitch_deg, yaw_deg 
+
+def format_orientation(pitch, yaw):
+    return f"Pitch: {pitch:6.2f}°, Yaw: {yaw:6.2f}°"
 
 def capsule_info(textC):
-    textC.text = "Position: " + str(get_pos())  + " Velocity: "+ str(get_capsule_vel()) 
+    try:
+        # Get current position and velocity
+        current_pos = get_pos()
+        current_vel = get_capsule_vel()
+        
+        # Calculate orientation
+        pitch, yaw = get_orientation(current_vel)
+        
+        pos_str = f"Position (km):    {current_pos}" 
+        vel_str = f"Velocity (km/s):  {current_vel}"
+        ori_str = f"Orientation:      {format_orientation(pitch, yaw)}"
+        
+        # Update the text
+        textC.text = f"{pos_str}\n{vel_str}\n{ori_str}"
+        
+    except Exception as e:
+        print(f"Error updating capsule info: {e}")
+        textC.text = "Error updating telemetry"
 
 # Run the application
 while True:
