@@ -183,7 +183,7 @@ def update_info(textE,thrusting):
 data.wait_until_ready("velocity")
 capsule_text = Text(
     text="Position: ????",
-    position=(x_position, -y_position + -y_position * .3),
+    position=(x_position, -y_position + -y_position * .5),
     scale=text_scale,
     color=color.white,
     alpha=0.9
@@ -196,33 +196,78 @@ def get_capsule_vel():
     global currentIndex
     return float(data.vx[currentIndex]), float(data.vy[currentIndex]), float(data.vz[currentIndex])
 
-def get_orientation(velocity_vector):
-    vx, vy, vz = velocity_vector
-    pitch = np.arctan2(vy, np.sqrt(vx**2 + vz**2))
-    yaw = np.arctan2(vx, vz)
-    pitch_deg = np.degrees(pitch)
-    yaw_deg = np.degrees(yaw)
+def calculate_lvlh_orientation(position, velocity):
+    """
+    Calculate spacecraft orientation in LVLH frame using position and velocity vectors
+    Returns basis vectors and angles
+    """
+    # Convert to numpy arrays
+    r = np.array(position, dtype=float)
+    v = np.array(velocity, dtype=float)
     
-    return pitch_deg, yaw_deg 
-
-def format_orientation(pitch, yaw):
-    return f"Pitch: {pitch:6.2f}°, Yaw: {yaw:6.2f}°"
+    # Normalize vectors
+    r_norm = np.linalg.norm(r)
+    v_norm = np.linalg.norm(v)
+    
+    if r_norm == 0 or v_norm == 0:
+        return None
+    
+    # Calculate LVLH frame basis vectors
+    z_lvlh = -r / r_norm  # Nadir direction (towards Earth)
+    h = np.cross(r, v)    # Angular momentum vector
+    h_norm = np.linalg.norm(h)
+    
+    if h_norm == 0:
+        return None
+        
+    y_lvlh = h / h_norm  # Normal to orbital plane
+    x_lvlh = np.cross(y_lvlh, z_lvlh)  # Completes right-handed system
+    
+    # Calculate angles
+    pitch = np.arcsin(np.dot(v/v_norm, -z_lvlh))
+    
+    # Project velocity onto x-z plane for yaw calculation
+    v_proj = v - np.dot(v, y_lvlh) * y_lvlh
+    v_proj_norm = np.linalg.norm(v_proj)
+    
+    if v_proj_norm > 0:
+        cos_yaw = np.dot(v_proj/v_proj_norm, x_lvlh)
+        yaw = np.arccos(np.clip(cos_yaw, -1.0, 1.0))
+        # Determine sign of yaw
+        if np.dot(v_proj, z_lvlh) < 0:
+            yaw = -yaw
+    else:
+        yaw = 0.0
+        
+    return {
+        'pitch_deg': np.degrees(pitch),
+        'yaw_deg': np.degrees(yaw),
+        'x_lvlh': x_lvlh,
+        'y_lvlh': y_lvlh,
+        'z_lvlh': z_lvlh
+    }
 
 def capsule_info(textC):
     try:
         # Get current position and velocity
         current_pos = get_pos()
-        current_vel = get_capsule_vel()
+        velocity = get_capsule_vel()
+        position = (data.px[currentIndex], data.py[currentIndex], data.pz[currentIndex])
         
-        # Calculate orientation
-        pitch, yaw = get_orientation(current_vel)
+        # Calculate LVLH orientation
+        orientation = calculate_lvlh_orientation(position, velocity)
         
-        pos_str = "Position (km): " + str(current_pos) 
-        vel_str = "Velocity (km/s): " + str(current_vel)
-        ori_str = f"Orientation:      {format_orientation(pitch, yaw)}"
+        if orientation is None:
+            orientation_str = "Orientation: Unable to calculate"
+        else:
+            orientation_str = f"Orientation (LVLH):\nPitch: {orientation['pitch_deg']:6.2f}°\nYaw: {orientation['yaw_deg']:6.2f}°"
         
-        # Update the text
-        textC.text = f"{pos_str}\n{vel_str}\n{ori_str}"
+        # Format the display text
+        pos_str = f"Position (km): {current_pos}"
+        vel_str = f"Velocity (km/s): {velocity}"
+        
+        # Update the text with all information
+        textC.text = f"{pos_str}\n{vel_str}\n{orientation_str}"
         
     except Exception as e:
         print(f"Error updating capsule info: {e}")
