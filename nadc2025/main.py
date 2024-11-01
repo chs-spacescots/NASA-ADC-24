@@ -201,9 +201,8 @@ def get_pos():
     return data.trajectory_points[currentIndex]
 
 def get_capsule_vel():
-    global currentIndex, velocities
-    vx, vy, vz = velocities[currentIndex]
-    return float(vx), float(vy), float(vz)
+    global currentIndex
+    return data.velocities(currentIndex)
 
 def get_orientation(velocity_vector):
     vx, vy, vz = velocity_vector
@@ -218,24 +217,6 @@ def format_orientation(pitch, yaw):
     return f"Pitch: {pitch:6.2f}°, Yaw: {yaw:6.2f}°"
 
 def capsule_info(textC):
-    try:
-        # Get current position and velocity
-        current_pos = get_pos()
-        current_vel = get_capsule_vel()
-        
-        # Calculate orientation
-        pitch, yaw = get_orientation(current_vel)
-        
-        pos_str = f"Position (km):    {current_pos}" 
-        vel_str = f"Velocity (km/s):  {current_vel}"
-        ori_str = f"Orientation:      {format_orientation(pitch, yaw)}"
-        
-        # Update the text
-        textC.text = f"{pos_str}\n{vel_str}\n{ori_str}"
-        
-    except Exception as e:
-        print(f"Error updating capsule info: {e}")
-        textC.text = "Error updating telemetry"
     try:
         # Get current position and velocity
         current_pos = get_pos()
