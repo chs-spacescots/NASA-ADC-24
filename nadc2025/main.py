@@ -190,7 +190,7 @@ capsule_text = Text(
 )
 def get_pos():
     global currentIndex
-    return data.trajectory_points[currentIndex]
+    return float(data.px[currentIndex] * 1000), float(data.py[currentIndex] * 1000), float(data.pz[currentIndex] * 1000)
 
 def get_capsule_vel():
     global currentIndex
