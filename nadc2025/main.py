@@ -190,11 +190,11 @@ capsule_text = Text(
 )
 def get_pos():
     global currentIndex
-    return float(data.px[currentIndex] * 1000), float(data.py[currentIndex] * 1000), float(data.pz[currentIndex] * 1000)
+    return int(data.px[currentIndex] * 1000), int(data.py[currentIndex] * 1000), int(data.pz[currentIndex] * 1000)
 
 def get_capsule_vel():
     global currentIndex
-    return data.velocities[currentIndex]
+    return float(data.vx[currentIndex]), float(data.vy[currentIndex]), float(data.vz[currentIndex])
 
 def get_orientation(velocity_vector):
     vx, vy, vz = velocity_vector
