@@ -2,8 +2,12 @@ import os
 import platform
 from ursina import *
 
+try:
+    import libdata as data
+except:
+    from nadc2025 import libdata as data
+
 #load & read data
-import libdata as data
 data.init()
 
 # Initialize the Ursina application
