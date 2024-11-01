@@ -173,10 +173,10 @@ def update_info(textE,thrusting):
         thrusting=False
 
     if thrusting:
-        textE.text=f"Thrusting: YES {data.mass[currentIndex]}\n{int(data.time_min[currentIndex])}:{int(data.time_sec[currentIndex]%60)}"
+        textE.text=f"Thrusting: YES {int(data.time_min[currentIndex])}:{int(data.time_sec[currentIndex]%60)}"
         textE.color=color.green
     else:
-        textE.text=f"Thrusting: NO {data.mass[currentIndex]}\n{int(data.time_min[currentIndex])}:{int(data.time_sec[currentIndex]%60)}"
+        textE.text=f"Thrusting: NO {int(data.time_min[currentIndex])}:{int(data.time_sec[currentIndex]%60)}"
         textE.color=color.black
 
 #capsule display window (displays capsule velocity vector, mass, orientation, position) DATA ONLY
@@ -265,9 +265,10 @@ def capsule_info(textC):
         # Format the display text
         pos_str = f"Position (km): {current_pos}"
         vel_str = f"Velocity (km/s): {velocity}"
+        mass_str = "Mass(kg): " +  str(data.mass[currentIndex])
         
         # Update the text with all information
-        textC.text = f"{pos_str}\n{vel_str}\n{orientation_str}"
+        textC.text = f"{pos_str}\n{vel_str}\n{mass_str}\n{orientation_str}\n"
         
     except Exception as e:
         print(f"Error updating capsule info: {e}")
