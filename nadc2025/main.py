@@ -3,13 +3,20 @@ import platform
 from ursina import *
 import numpy as np
 
-try:
-    import libdata as data
-except:
-    from nadc2025 import libdata as data
+# Load the dataset
+data = pd.read_csv(os.path.join(os.path.dirname(
+    os.path.realpath(__file__)), 'dataset.csv'))
 
-#load & read data
-data.init()
+# Extract the position coordinates
+x = data['Rx(km)[J2000-EARTH]']
+y = data['Ry(km)[J2000-EARTH]']
+z = data['Rz(km)[J2000-EARTH]']
+mass = data['MASS (kg)']
+missionTime = data['MISSION ELAPSED TIME (mins)']
+Vx = data['Vx(km/s)[J2000-EARTH]']
+Vy = data['Vy(km/s)[J2000-EARTH]']
+Vz = data['Vz(km/s)[J2000-EARTH]']
+velocities = []
 
 # Initialize the Ursina application
 app = Ursina()
@@ -184,7 +191,7 @@ def update_info(textE,thrusting):
 data.wait_until_ready("velocity")
 capsule_text = Text(
     text="Position: ????",
-    position=(x_position, -y_position + -y_position * .2),
+    position=(x_position, -y_position + -y_position * .3),
     scale=text_scale,
     color=color.white,
     alpha=0.9
@@ -194,9 +201,9 @@ def get_pos():
     return data.trajectory_points[currentIndex]
 
 def get_capsule_vel():
-    global currentIndex
-    return data.velocities[currentIndex]
-    
+    global currentIndex, velocities
+    vx, vy, vz = velocities[currentIndex]
+    return float(vx), float(vy), float(vz)
 
 def get_orientation(velocity_vector):
     vx, vy, vz = velocity_vector
@@ -211,6 +218,24 @@ def format_orientation(pitch, yaw):
     return f"Pitch: {pitch:6.2f}°, Yaw: {yaw:6.2f}°"
 
 def capsule_info(textC):
+    try:
+        # Get current position and velocity
+        current_pos = get_pos()
+        current_vel = get_capsule_vel()
+        
+        # Calculate orientation
+        pitch, yaw = get_orientation(current_vel)
+        
+        pos_str = f"Position (km):    {current_pos}" 
+        vel_str = f"Velocity (km/s):  {current_vel}"
+        ori_str = f"Orientation:      {format_orientation(pitch, yaw)}"
+        
+        # Update the text
+        textC.text = f"{pos_str}\n{vel_str}\n{ori_str}"
+        
+    except Exception as e:
+        print(f"Error updating capsule info: {e}")
+        textC.text = "Error updating telemetry"
     try:
         # Get current position and velocity
         current_pos = get_pos()
