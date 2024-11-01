@@ -14,6 +14,10 @@ y = data['Ry(km)[J2000-EARTH]']
 z = data['Rz(km)[J2000-EARTH]']
 mass = data['MASS (kg)']
 missionTime = data['MISSION ELAPSED TIME (mins)']
+Vx = data['Vx(km/s)[J2000-EARTH]']
+Vy = data['Vy(km/s)[J2000-EARTH]']
+Vz = data['Vz(km/s)[J2000-EARTH]']
+velocities = []
 
 # Initialize the Ursina application
 app = Ursina()
@@ -27,8 +31,10 @@ EditorCamera()
 
 # Create an entity for the trajectory
 trajectory_points = []
+position = []
 for i in range(len(x)):
     trajectory_points.append(Vec3(x[i], y[i], z[i])/1000)  # 1u = 1km
+    velocities.append((Vx[i], Vy[i], Vz[i]))
 
 # Create a mesh for the trajectory
 trajectory_mesh = Entity(
@@ -185,11 +191,35 @@ def update_info(textE,thrusting):
         textE.text="Thrusting: NO ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
         textE.color=color.black
 
+#capsule display window (displays capsule velocity vector, mass, orientation, position) DATA ONLY
+capsule_text = Text(
+    text="Position: ????",
+    position=(x_position, -y_position + -y_position * .2),
+    scale=text_scale,
+    color=color.white,
+    alpha=0.9
+)
+def get_pos():
+    global currentIndex, position
+    for i in range(len(x)):
+        position.append(Vec3(x[i], y[i], z[i]))
+    return position[currentIndex]
+
+def get_capsule_vel():
+    global currentIndex, velocities
+    vx, vy, vz = velocities[currentIndex]
+    return float(vx), float(vy), float(vz)
+    
+
+def capsule_info(textC):
+    textC.text = "Position: " + str(get_pos())  + " Velocity: "+ str(get_capsule_vel()) 
+
 # Run the application
 while True:
     # v+=1/60 * time.dt # one minute to completion.
     step_frame(time.dt)
     update_sphere_position(current_frac)
     update_info(info_text,thrusting)
-
+    capsule_info(capsule_text)
+    
     app.step()
