@@ -185,20 +185,6 @@ def update_info(textE,thrusting):
         textE.text="Thrusting: NO ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
         textE.color=color.black
 
-thrusting=False
-def update_info(textE,thrusting):
-    if currentIndex!=0 and mass[currentIndex]!=mass[currentIndex-1]:
-        thrusting=True
-    if thrusting and mass[currentIndex]==mass[currentIndex-1]:
-        thrusting=False
-
-    if thrusting:
-        textE.text="Thrusting: YES ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
-        textE.color=color.green
-    else:
-        textE.text="Thrusting: NO ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
-        textE.color=color.black
-
 # Run the application
 while True:
     # v+=1/60 * time.dt # one minute to completion.
