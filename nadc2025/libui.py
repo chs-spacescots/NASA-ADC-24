@@ -2,13 +2,6 @@ import ursina
 import platform
 
 
-#{ settings
-FONTSIZE_REG=.6
-FONTSIZE_SMALL=.9
-FONTSIZE_BIG=1.2
-#} settings
-
-
 _all      = []
 _dynamic  = []#autoscale+move with screen size
 _static   = []#don't automatically reposition

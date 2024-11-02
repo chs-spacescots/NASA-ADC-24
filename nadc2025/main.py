@@ -3,20 +3,22 @@ import platform
 from ursina import *
 
 try:
+    import config
     import libdata as data
     import libui as ui
 except ModuleNotFoundError:
+    from nadc2025 import config
     from nadc2025 import libdata as data
     from nadc2025 import libui as ui
 except Exception as e:
     print("BIG OOPSY DOOPSIE IN IMPORTS!!")
     print(repr(e))
 
-#load & read data
-data.init()
-
 # Initialize the Ursina application
 app = Ursina()
+
+#load & read data
+data.init()
 
 # Set up the camera
 EditorCamera()
@@ -126,7 +128,7 @@ ui.add_elements([
     Button(
         text='Play',
         position=(-.3, -.4),
-        text_size=ui.FONTSIZE_SMALL,
+        text_size=config.FONTSIZE_SMALL,
         scale=.1,
         color=color.black, text_color=color.green,
         on_click=play
@@ -134,7 +136,7 @@ ui.add_elements([
     Button(
         text='Stop',
         position=(-.14, -.4),
-        text_size=ui.FONTSIZE_SMALL,
+        text_size=config.FONTSIZE_SMALL,
         scale=.1,
         color=color.black, text_color=color.orange,
         on_click = pause
@@ -142,7 +144,7 @@ ui.add_elements([
     Button(
         text='Rev',
         position=(.02, -.4),
-        text_size=ui.FONTSIZE_SMALL,
+        text_size=config.FONTSIZE_SMALL,
         scale=.1,
         color=color.black, text_color=color.red,
         on_click = rev
@@ -155,13 +157,14 @@ instructions_text = ui.add_element(Text(
     text="Hold right mouse to rotate\nWASD to move the camera while rotating\nCommand+Q to quit",
     position=(0, .45),origin=(0,0),
     color=color.white,
+    font="HelveticaNeue-Condensed.otf",
     alpha=0.9
 ))
 
 info_text = ui.add_element(Text(
     text="Thrusting: ???\nTIME",
     position=(-.2, .25),
-    text_size=ui.FONTSIZE_SMALL,
+    text_size=config.FONTSIZE_SMALL,
     color=color.white,
     alpha=0.9
 ))
