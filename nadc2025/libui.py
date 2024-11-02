@@ -1,6 +1,6 @@
 import ursina
 import platform
-
+from ursina import Vec3
 
 _all      = []
 _dynamic  = []#autoscale+move with screen size
@@ -56,25 +56,32 @@ print(f"Ursina Window Size: {ursina.window.size}")
 size_scale=pos_scale=text_scale = 1
 if platform.system() == "Darwin":  # macOS
     size_scale = .05#=.05 (but why?)
-    pos_scale  = .05
+    x_scale  = .05
+    y_scale  = .05
     text_scale = .1
 elif platform.system() == "Windows": #Windows
     # please adjust these values until TL,TR,BL,BR are at the corners of your screen!!
     size_scale = 1
-    pos_scale  = 1
+    x_scale  = 1.775
+    y_scale  = 1
     text_scale = 1
     pass
 else: #Linux
     # please adjust these values until TL,TR,BL,BR are at the corners of your screen!!
     size_scale = 1
-    pos_scale  = .1
+    x_scale  = .1
+    y_scale  = .1
     text_scale = 1
 
 def refit():
     for element in _dynamic:
         assert element.parent.name=="ui"# don't rescale if it's not a UI element
 
-        element.position*=pos_scale
+        element.position = Vec3(
+            element.position.x * x_scale, 
+            element.position.y * y_scale, 
+            element.position.z
+        )
         element.scale*=size_scale
         if hasattr(element, 'text_size'):#check if it has text before scaling text
             element.text_size*=text_scale
