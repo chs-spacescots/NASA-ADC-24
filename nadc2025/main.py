@@ -125,7 +125,7 @@ ui.add_elements([
 ui.add_elements([
     Button(
         text='Play',
-        position=(-.3, -.2),
+        position=(-.3, -.4),
         text_size=ui.FONTSIZE_SMALL,
         scale=.1,
         color=color.black, text_color=color.green,
@@ -133,7 +133,7 @@ ui.add_elements([
     ),
     Button(
         text='Stop',
-        position=(-.04, -.2),
+        position=(-.14, -.4),
         text_size=ui.FONTSIZE_SMALL,
         scale=.1,
         color=color.black, text_color=color.orange,
@@ -141,7 +141,7 @@ ui.add_elements([
     ),
     Button(
         text='Rev',
-        position=(.12, -.2),
+        position=(.02, -.4),
         text_size=ui.FONTSIZE_SMALL,
         scale=.1,
         color=color.black, text_color=color.red,
@@ -153,14 +153,14 @@ ui.add_elements([
 # Instructions for dumbos
 instructions_text = ui.add_element(Text(
     text="Hold right mouse to rotate\nWASD to move the camera while rotating\nCommand+Q to quit",
-    position=(-.3, .2),
+    position=(0, .45),origin=(0,0),
     color=color.white,
     alpha=0.9
 ))
 
 info_text = ui.add_element(Text(
     text="Thrusting: ???\nTIME",
-    position=(-.02, .022),
+    position=(-.2, .25),
     text_size=ui.FONTSIZE_SMALL,
     color=color.white,
     alpha=0.9
