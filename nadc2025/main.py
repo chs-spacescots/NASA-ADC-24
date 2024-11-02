@@ -1,8 +1,6 @@
 import os
 import platform
-import pandas as pd
 from ursina import *
-import platform
 
 try:
     import libdata as data
@@ -13,12 +11,8 @@ except ModuleNotFoundError:
 except Exception as e:
     print(repr(e))
 
-# Extract the position coordinates
-x = data['Rx(km)[J2000-EARTH]']
-y = data['Ry(km)[J2000-EARTH]']
-z = data['Rz(km)[J2000-EARTH]']
-mass = data['MASS (kg)']
-missionTime = data['MISSION ELAPSED TIME (mins)']
+#load & read data
+data.init()
 
 # Initialize the Ursina application
 app = Ursina()
@@ -30,14 +24,10 @@ EditorCamera()
 # camera.position = Vec3(0, 0, 0)# Vec3(0, 0, 0)
 
 
-# Create an entity for the trajectory
-trajectory_points = []
-for i in range(len(x)):
-    trajectory_points.append(Vec3(x[i], y[i], z[i])/1000)  # 1u = 1km
-
-# Create a mesh for the trajectory
+# Create a mesh from the trajectory
+data.wait_until_ready("trajectory")
 trajectory_mesh = Entity(
-    model=Mesh(vertices=trajectory_points, mode='line', thickness=1),
+    model=Mesh(vertices=data.trajectory_points, mode='line', thickness=1),
     color=color.blue
 )
 
@@ -53,16 +43,16 @@ Entity(model='cube', color=color.white,
 
 # Sphere that moves along the trajectory
 mark = Entity(model='sphere', color=color.red, scale=2)
-mark.position = trajectory_points[0]
+mark.position = data.trajectory_points[0]
 
 
 currentIndex=0
 def update_sphere_position(perc):
     global currentIndex
 
-    currentIndex = int(perc * (len(trajectory_points) - 1))
+    currentIndex = int(perc * (len(data.trajectory_points) - 1))
 
-    out = slerp(trajectory_points[currentIndex], trajectory_points[currentIndex+1], perc)
+    out = slerp(data.trajectory_points[currentIndex], data.trajectory_points[currentIndex+1], perc)
 
     mark.position = out
 
@@ -156,17 +146,18 @@ info_text = Text(
 )
 
 thrusting=False
+data.wait_until_ready("time")
 def update_info(textE,thrusting):
-    if currentIndex!=0 and mass[currentIndex]!=mass[currentIndex-1]:
+    if currentIndex!=0 and data.mass[currentIndex]!=data.mass[currentIndex-1]:
         thrusting=True
-    if thrusting and mass[currentIndex]==mass[currentIndex-1]:
+    if thrusting and data.mass[currentIndex]==data.mass[currentIndex-1]:
         thrusting=False
 
     if thrusting:
-        textE.text="Thrusting: YES ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.text=f"Thrusting: YES {data.mass[currentIndex]}\n{int(data.time_min[currentIndex])}:{int(data.time_sec[currentIndex]%60)}"
         textE.color=color.green
     else:
-        textE.text="Thrusting: NO ("+str(mass[currentIndex])+")"+"\n"+str(int(missionTime[currentIndex]))+":"+str(int(missionTime[currentIndex]%1 *60))
+        textE.text=f"Thrusting: NO {data.mass[currentIndex]}\n{int(data.time_min[currentIndex])}:{int(data.time_sec[currentIndex]%60)}"
         textE.color=color.black
 
 # Run the application
