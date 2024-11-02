@@ -4,9 +4,14 @@ import pandas as pd
 from ursina import *
 import platform
 
-# Load the dataset
-data = pd.read_csv(os.path.join(os.path.dirname(
-    os.path.realpath(__file__)), 'dataset.csv'))
+try:
+    import libdata as data
+    import libui as ui
+except ModuleNotFoundError:
+    from nadc2025 import libdata as data
+    from nadc2025 import libui as ui
+except Exception as e:
+    print(repr(e))
 
 # Extract the position coordinates
 x = data['Rx(km)[J2000-EARTH]']
@@ -96,28 +101,7 @@ def pause():
     global speed
     speed = 0
 
-#TEMPORARY FIX FOR UI SCALING ISSUES BASED ON OS, PLEASE HAVE A LESS CAVEMAN FIX LATER
-if platform.system() == "Darwin":  # macOS
-    button_scale = 0.005
-    button_spacing = 0.006
-    text_size = 0.09
-    y_position = -.02
-    x_position = -.02
-    text_scale = (text_size, .1)
-elif platform.system() == "Windows": #Windows
-    button_scale = 0.1
-    button_spacing = 0.06
-    text_size = 0.9
-    y_position = -0.3
-    x_position = -0.2
-    text_scale = (text_size, 1)
-else: #Linux, pls change vals as you see fit
-    button_scale = 0.1
-    button_spacing = 0.06
-    text_size = 0.9
-    y_position = -.075
-    x_position = -.02
-    text_scale = (text_size, 1)
+
 # Play button
 play_button = Button(
     text='Play',
