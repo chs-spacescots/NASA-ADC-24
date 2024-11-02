@@ -65,7 +65,6 @@ elif platform.system() == "Windows": #Windows
     x_scale  = 1.775
     y_scale  = 1
     text_scale = 1
-    pass
 else: #Linux
     # please adjust these values until TL,TR,BL,BR are at the corners of your screen!!
     size_scale = 1
@@ -78,8 +77,8 @@ def refit():
         assert element.parent.name=="ui"# don't rescale if it's not a UI element
 
         element.position = Vec3(
-            element.position.x * x_scale, 
-            element.position.y * y_scale, 
+            element.position.x * x_scale,
+            element.position.y * y_scale,
             element.position.z
         )
         element.scale*=size_scale
