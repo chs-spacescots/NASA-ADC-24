@@ -1,4 +1,13 @@
 import ursina
+import platform
+
+
+#{ settings
+FONTSIZE_REG=.6
+FONTSIZE_SMALL=.9
+FONTSIZE_BIG=1.2
+#} settings
+
 
 _all      = []
 _dynamic  = []#autoscale+move with screen size
@@ -16,8 +25,63 @@ def add_element(uielement, autoscale=True):
 
     return uielement
 
-def add_elements(uielements, should_autoscale):
-    [add_element(i,autoscale=should_autoscale) for i in uielements]
+def add_elements(uielements, autoscale_all=True, parent=None):
+    [add_element(i,autoscale=autoscale_all) for i in uielements]
+    if parent:
+        for e in uielements:
+            e.parent=parent
+
     return uielements
 
-print(ursina.window.size)
+print(f"Ursina Window Size: {ursina.window.size}")
+#assuming a windowed screen size of Vec2(1280, 720)...
+
+#caveman checks
+# if platform.system() == "Darwin":  # macOS
+#     button_scale = 0.005
+#     button_spacing = 0.006
+#     text_size = 0.09
+#     y_position = -.02
+#     x_position = -.02
+#     text_scale = (text_size, .1)
+# elif platform.system() == "Windows": #Windows
+#     button_scale = 0.1
+#     button_spacing = 0.06
+#     text_size = 0.9
+#     y_position = -0.3
+#     x_position = -0.2
+#     text_scale = (text_size, 1)
+# else: #Linux, pls change vals as you see fit
+#     button_scale = 0.1
+#     button_spacing = 0.06
+#     text_size = 0.9
+#     y_position = -.075
+#     x_position = -.02
+#     text_scale = (text_size, 1)
+
+#...convert to caveman SCALING factors
+size_scale=pos_scale=text_scale = 1
+if platform.system() == "Darwin":  # macOS
+    size_scale = .05#=.05 (but why?)
+    pos_scale  = .05
+    text_scale = .1
+elif platform.system() == "Windows": #Windows
+    # please adjust these values until TL,TR,BL,BR are at the corners of your screen!!
+    size_scale = 1
+    pos_scale  = 1
+    text_scale = 1
+    pass
+else: #Linux
+    # please adjust these values until TL,TR,BL,BR are at the corners of your screen!!
+    size_scale = 1
+    pos_scale  = .1
+    text_scale = 1
+
+def refit():
+    for element in _dynamic:
+        assert element.parent.name=="ui"# don't rescale if it's not a UI element
+
+        element.position*=pos_scale
+        element.scale*=size_scale
+        if hasattr(element, 'text_size'):#check if it has text before scaling text
+            element.text_size*=text_scale
