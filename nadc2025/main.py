@@ -33,8 +33,11 @@ trajectory_mesh = Entity(
     model=Mesh(vertices=data.trajectory_points, mode='line', thickness=1),
     color=color.blue
 )
-
-# Add origin and axis indicators
+#TODO:
+# - add earth and moon
+# - add textures
+# - add a sun!!
+# - sunlight !
 Entity(model='cube', color=color.red,
        scale=(.1, .1, .1), position=(0, 0, 0))  # Origin
 Entity(model='cube', color=color.green, scale=(
