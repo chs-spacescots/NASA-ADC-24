@@ -1,9 +1,18 @@
 import ursina
 import platform
 import os
+from pathlib import Path
+
+current_dir = Path(__file__).parent
+fonts_dir = current_dir/'fonts'
+
+ursina.application.fonts_folder = str(fonts_dir)  
 
 # hacky way to add the font folder to ursina
-ursina.application._model_path.append_path(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fonts'))
+try:
+    ursina.application._model_path.append_path(os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fonts'))
+except:
+    ursina.application.fonts_folder = str(fonts_dir)
 # actually displaying custom fonts
 _FONTPATH = os.path.join(os.path.dirname(os.path.realpath(__file__)), 'fonts')
 FONTLIST = [file for file in os.listdir(ursina.application.fonts_folder) if file.endswith(".ttf") or file.endswith(".otf")]
