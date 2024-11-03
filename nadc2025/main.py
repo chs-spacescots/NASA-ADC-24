@@ -3,15 +3,22 @@ import platform
 from ursina import *
 
 try:
+    import config
     import libdata as data
-except:
+    import libui as ui
+except ModuleNotFoundError:
+    from nadc2025 import config
     from nadc2025 import libdata as data
-
-#load & read data
-data.init()
+    from nadc2025 import libui as ui
+except Exception as e:
+    print("BIG OOPSY DOOPSIE IN IMPORTS!!")
+    print(repr(e))
 
 # Initialize the Ursina application
 app = Ursina()
+
+#load & read data
+data.init()
 
 # Set up the camera
 EditorCamera()
@@ -46,9 +53,10 @@ currentIndex=0
 def update_sphere_position(perc):
     global currentIndex
 
-    currentIndex = int(perc * (len(data.trajectory_points) - 1))
+    maxIndex = len(data.trajectory_points)-1
+    currentIndex = int(perc * maxIndex)
 
-    out = slerp(data.trajectory_points[currentIndex], data.trajectory_points[currentIndex+1], perc)
+    out = slerp(data.trajectory_points[currentIndex], data.trajectory_points[min(currentIndex+1,maxIndex)], perc)
 
     mark.position = out
 
@@ -58,22 +66,18 @@ DURATION_SEC = 120
 speed = 0
 current_frac = 0
 
-
 def step_frame(dt):
     global current_frac, speed, DURATION_SEC
     current_frac += speed/DURATION_SEC * dt
     current_frac = clamp(current_frac, 0, 1)
 
 # video buttons
-
-
 def play():
     global speed, camera
     if speed < 0:
         speed = 1
     else:
         speed += .5
-
 
 def rev():
     global speed
@@ -82,85 +86,88 @@ def rev():
     else:
         speed -= .5
 
-
 def pause():
     global speed
     speed = 0
 
-#TEMPORARY FIX FOR UI SCALING ISSUES BASED ON OS, PLEASE HAVE A LESS CAVEMAN FIX LATER
-if platform.system() == "Darwin":  # macOS
-    button_scale = 0.005
-    button_spacing = 0.006
-    text_size = 0.09
-    y_position = -.02
-    x_position = -.02
-    text_scale = (text_size, .1)
-elif platform.system() == "Windows": #Windows
-    button_scale = 0.1
-    button_spacing = 0.06
-    text_size = 0.9
-    y_position = -0.3
-    x_position = -0.2
-    text_scale = (text_size, 1)
-else: #Linux, pls change vals as you see fit
-    button_scale = 0.1
-    button_spacing = 0.06
-    text_size = 0.9
-    y_position = -.075
-    x_position = -.02
-    text_scale = (text_size, 1)
+
+
+ui.add_elements([
+    Text(
+        text="TL",
+        position=(-.5, .5),origin=(-.5, .5),
+        scale=1,
+        color=color.red,
+        alpha=0.9
+    ),
+    Text(
+        text="TR",
+        position=(.5, .5),origin=(.5, .5),
+        scale=1,
+        color=color.red,
+        alpha=0.9
+    ),
+    Text(
+        text="BL",
+        position=(-.5, -.5),origin=(-.5, -.5),
+        scale=1,
+        color=color.red,
+        alpha=0.9
+    ),
+    Text(
+        text="BR",
+        position=(.5, -.5),origin=(.5, -.5),
+        scale=1,
+        color=color.red,
+        alpha=0.9
+    ),
+])
+
 # Play button
-play_button = Button(
-    text='Play',
-    position=(x_position, y_position),
-    text_size=text_size,
-    scale=button_scale,
-    color=color.black,
-    parent=camera.ui,
-    text_color=color.green
-)
-play_button.on_click = play
-
-# Pause button
-pause_button = Button(
-    text='Stop',
-    position=(x_position + button_spacing + button_scale, y_position),
-    text_size=text_size,
-    scale=button_scale,
-    color=color.black,
-    parent=camera.ui,
-    text_color=color.orange
-)
-pause_button.on_click = pause
-
-# Reverse button
-reverse_button = Button(
-    text='Rev',
-    position=(x_position + 2 * (button_spacing + button_scale), y_position),
-    text_size=text_size,
-    scale=button_scale,
-    color=color.black,
-    parent=camera.ui,
-    text_color=color.red
-)
-reverse_button.on_click = rev
+ui.add_elements([
+    Button(
+        text='Play',
+        position=(-.3, -.4),
+        text_size=config.FONTSIZE_SMALL,
+        scale=.1,
+        color=color.black, text_color=color.green,
+        on_click=play
+    ),
+    Button(
+        text='Stop',
+        position=(-.14, -.4),
+        text_size=config.FONTSIZE_SMALL,
+        scale=.1,
+        color=color.black, text_color=color.orange,
+        on_click = pause
+    ),
+    Button(
+        text='Rev',
+        position=(.02, -.4),
+        text_size=config.FONTSIZE_SMALL,
+        scale=.1,
+        color=color.black, text_color=color.red,
+        on_click = rev
+    )
+], parent=camera.ui)
+# reverse_button.on_click = rev
 
 # Instructions for dumbos
-instructions_text = Text(
+instructions_text = ui.add_element(Text(
     text="Hold right mouse to rotate\nWASD to move the camera while rotating\nCommand+Q to quit",
-    position=(x_position, -y_position),
-    scale=text_scale,
+    position=(0, .45),origin=(0,0),
     color=color.white,
+    font="HelveticaNeue-Condensed.otf",
     alpha=0.9
-)
+))
 
-info_text = Text(
+info_text = ui.add_element(Text(
     text="Thrusting: ???\nTIME",
-    position=(-.02, .022),
-    scale=text_scale,
+    position=(-.2, .25),
+    text_size=config.FONTSIZE_SMALL,
     color=color.white,
     alpha=0.9
-)
+))
 
 thrusting=False
 data.wait_until_ready("time")
@@ -178,6 +185,7 @@ def update_info(textE,thrusting):
         textE.color=color.black
 
 # Run the application
+ui.refit()
 while True:
     # v+=1/60 * time.dt # one minute to completion.
     step_frame(time.dt)
